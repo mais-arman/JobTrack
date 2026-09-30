@@ -23,8 +23,11 @@ import type {
   Application,
   ApplicationInput,
   BadRequestResponse,
+  ConnectGmail200,
+  GmailSearchInput,
   HealthStatus,
   NotFoundResponse,
+  SearchGmail200,
   ServerErrorResponse
 } from './api.schemas';
 
@@ -54,6 +57,168 @@ const withQueryKey = <T extends object, K>(query: T, queryKey: K): T & { queryKe
   }
   return result;
 };
+
+export const getConnectGmailUrl = () => {
+
+
+
+
+  return `/api/gmail/connect`
+}
+
+/**
+ * @summary Verify the Replit Gmail connection (development only)
+ */
+export const connectGmail = async ( options?: Parameters<typeof customFetch>[1]): Promise<ConnectGmail200> => {
+
+  return customFetch<ConnectGmail200>(getConnectGmailUrl(),
+  {
+    ...options,
+    method: 'POST'
+
+
+  }
+);}
+
+
+
+
+
+export const getConnectGmailMutationKey = () => ['connectGmail'] as const;
+
+export const getConnectGmailMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof connectGmail>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof connectGmail>>, TError,void, TContext> => {
+
+const mutationKey = getConnectGmailMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof connectGmail>>, void> = () => {
+
+
+          return  connectGmail(requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type ConnectGmailMutationResult = NonNullable<Awaited<ReturnType<typeof connectGmail>>>
+
+    export type ConnectGmailMutationError = ErrorType<unknown>
+
+
+    /**
+ * @summary Verify the Replit Gmail connection (development only)
+ */
+export const useConnectGmail = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof connectGmail>>, TError,void, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof connectGmail>>,
+        TError,
+        void,
+        TContext
+      > => {
+      return useMutation(getConnectGmailMutationOptions(options));
+    }
+
+export const getSearchGmailUrl = () => {
+
+
+
+
+  return `/api/gmail/search`
+}
+
+/**
+ * @summary Manually retrieve up to 20 Gmail previews (development only)
+ */
+export const searchGmail = async (gmailSearchInput?: GmailSearchInput, options?: Parameters<typeof customFetch>[1]): Promise<SearchGmail200> => {
+
+    const getHeaders = (h?: NonNullable<RequestInit['headers']>): Record<string, string | readonly string[]> => {
+    if (!h) return {};
+    if (h instanceof Headers) return Object.fromEntries(h.entries());
+    if (Symbol.iterator in h) {
+      return Object.fromEntries(
+        Array.from(h as Iterable<Iterable<string>>, (entry) => Array.from(entry) as [string, string]),
+      );
+    }
+    const headers: Record<string, string | readonly string[]> = {};
+    for (const [name, value] of Object.entries<string | readonly string[] | undefined>(h)) {
+      if (value !== undefined) headers[name] = value;
+    }
+    return headers;
+  };
+return customFetch<SearchGmail200>(getSearchGmailUrl(),
+  {
+    ...options,
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', ...getHeaders(options?.headers) },
+    body: JSON.stringify(gmailSearchInput)
+  }
+);}
+
+
+
+
+
+export const getSearchGmailMutationKey = () => ['searchGmail'] as const;
+
+export const getSearchGmailMutationOptions = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof searchGmail>>, TError,SearchGmailMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+): UseMutationOptions<Awaited<ReturnType<typeof searchGmail>>, TError,SearchGmailMutationVariables, TContext> => {
+
+const mutationKey = getSearchGmailMutationKey();
+const {mutation: mutationOptions, request: requestOptions} = options ?
+      options.mutation && 'mutationKey' in options.mutation && options.mutation.mutationKey ?
+      options
+      : {...options, mutation: {...options.mutation, mutationKey}}
+      : {mutation: { mutationKey, }, request: undefined};
+
+
+
+
+      const mutationFn: MutationFunction<Awaited<ReturnType<typeof searchGmail>>, SearchGmailMutationVariables> = (props) => {
+          const {data} = props ?? {};
+
+          return  searchGmail(data,requestOptions)
+        }
+
+
+
+
+
+
+  return  { mutationFn, ...mutationOptions }}
+
+    export type SearchGmailMutationResult = NonNullable<Awaited<ReturnType<typeof searchGmail>>>
+    export type SearchGmailMutationBody = BodyType<GmailSearchInput> | undefined
+    export type SearchGmailMutationError = ErrorType<unknown>
+    export type SearchGmailMutationVariables = {data?: BodyType<GmailSearchInput>}
+
+    /**
+ * @summary Manually retrieve up to 20 Gmail previews (development only)
+ */
+export const useSearchGmail = <TError = ErrorType<unknown>,
+    TContext = unknown>(options?: { mutation?:UseMutationOptions<Awaited<ReturnType<typeof searchGmail>>, TError,SearchGmailMutationVariables, TContext>, request?: SecondParameter<typeof customFetch>}
+ ): UseMutationResult<
+        Awaited<ReturnType<typeof searchGmail>>,
+        TError,
+        SearchGmailMutationVariables,
+        TContext
+      > => {
+      return useMutation(getSearchGmailMutationOptions(options));
+    }
 
 export const getHealthCheckUrl = () => {
 

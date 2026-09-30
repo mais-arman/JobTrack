@@ -31,7 +31,7 @@ JobTrack is a personal tracker for jobs, internships, training, and other opport
 - PostgreSQL is the sole active source of application data, accessed through the shared Express API using Drizzle.
 - Authentication is explicitly deferred. Applications are a shared collection, not private per-user records. Do not publish sensitive application data without adding access control.
 - Legacy browser records are retained only for downloadable backup, not merged or uploaded automatically. This avoids silently sharing previously local personal records.
-- Gmail is a source label only, not a connected integration.
+- Gmail uses the existing Replit-managed read-only connector in development preview only. No per-visitor OAuth is provided. Preview users share access to the connected mailbox; production endpoints must remain blocked until explicit access-control work is authorized. Searches are manual and previews are never persisted.
 
 ## Product
 
@@ -39,7 +39,7 @@ Dashboard summaries, upcoming interviews, searchable and filterable applications
 
 ## User preferences
 
-Follow `.local/custom_skills/jobtrack-design-system/SKILL.md` for JobTrack UI work. Keep the MVP focused on application tracking; exclude Gmail integration, daily routine, payments, social features, messaging, and advanced analytics.
+Follow `.local/custom_skills/jobtrack-design-system/SKILL.md` for JobTrack UI work. Keep the MVP focused on application tracking and manual Gmail search; exclude daily routine, payments, social features, messaging, AI extraction, and advanced analytics.
 
 ## Gotchas
 

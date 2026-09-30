@@ -5,6 +5,11 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export interface GmailSearchInput {
+  /** @maxLength 500 */
+  query?: string;
+}
+
 export interface ApiError {
   error: string;
 }
@@ -190,4 +195,21 @@ export type NotFoundResponse = ApiError;
  * Unexpected server error
  */
 export type ServerErrorResponse = ApiError;
+
+export type ConnectGmail200 = {
+  connected: boolean;
+};
+
+export type SearchGmail200MessagesItem = {
+  id: string;
+  sender: string;
+  subject: string;
+  date: string;
+  snippet: string;
+};
+
+export type SearchGmail200 = {
+  hasMore: boolean;
+  messages: SearchGmail200MessagesItem[];
+};
 

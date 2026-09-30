@@ -5,6 +5,7 @@ import { OPPORTUNITY_TYPES, STATUSES, isClosed, statusTone, upcomingInterviews, 
 import { useStore } from "@/lib/store";
 import { PageHeader, StatusBadge, btn, toneDot } from "@/components/jt";
 import { cn } from "@/lib/utils";
+import { GmailPanel } from "@/components/gmail-panel";
 
 function greeting() {
   const h = new Date().getHours();
@@ -28,6 +29,7 @@ export default function Dashboard() {
       <PageHeader eyebrow={formatDate(todayISO(), { weekday: "long", month: "long", day: "numeric" })} title={<>{greeting()}.</>}>
         <Link href="/applications/new" className={btn.primary} data-testid="link-add-application"><Plus className="h-4 w-4" /> Add application</Link>
       </PageHeader>
+      {import.meta.env.DEV && <GmailPanel />}
 
       {!loaded && loading ? <p role="status" data-testid="status-loading-dashboard" className="text-sm text-muted-foreground">Loading applications…</p> : !loaded && loadError ? null : apps.length === 0 ? (
         <div className="rise relative overflow-hidden rounded-md border border-border bg-card p-8 sm:p-12" data-testid="empty-dashboard">

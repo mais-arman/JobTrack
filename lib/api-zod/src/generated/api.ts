@@ -9,6 +9,37 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Verify the Replit Gmail connection (development only)
+ */
+export const ConnectGmailResponse = zod.object({
+  "connected": zod.boolean()
+})
+
+
+/**
+ * @summary Manually retrieve up to 20 Gmail previews (development only)
+ */
+export const searchGmailBodyQueryMax = 500;
+
+
+
+export const SearchGmailBody = zod.object({
+  "query": zod.string().max(searchGmailBodyQueryMax).optional()
+})
+
+export const SearchGmailResponse = zod.object({
+  "hasMore": zod.boolean(),
+  "messages": zod.array(zod.object({
+  "id": zod.string(),
+  "sender": zod.string(),
+  "subject": zod.string(),
+  "date": zod.string(),
+  "snippet": zod.string()
+}))
+})
+
+
+/**
  * Returns server health status
  * @summary Health check
  */

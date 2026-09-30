@@ -13,6 +13,50 @@ tags:
   - name: applications
     description: Shared JobTrack application records (authentication is not enabled)
 paths:
+  /gmail/connect:
+    post:
+      operationId: connectGmail
+      summary: Verify the Replit Gmail connection (development only)
+      responses:
+        "200":
+          description: Connected
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [connected]
+                properties:
+                  connected: { type: boolean }
+  /gmail/search:
+    post:
+      operationId: searchGmail
+      summary: Manually retrieve up to 20 Gmail previews (development only)
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GmailSearchInput"
+      responses:
+        "200":
+          description: Matching messages; never persisted
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [messages, hasMore]
+                properties:
+                  hasMore: { type: boolean }
+                  messages:
+                    type: array
+                    items:
+                      type: object
+                      required: [id, sender, subject, date, snippet]
+                      properties:
+                        id: { type: string }
+                        sender: { type: string }
+                        subject: { type: string }
+                        date: { type: string }
+                        snippet: { type: string }
   /healthz:
     get:
       operationId: healthCheck
@@ -140,6 +184,12 @@ components:
           schema:
             $ref: "#/components/schemas/ApiError"
   schemas:
+    GmailSearchInput:
+      type: object
+      properties:
+        query:
+          type: string
+          maxLength: 500
     ApiError:
       type: object
       required: [error]
