@@ -13,6 +13,33 @@ tags:
   - name: applications
     description: Shared JobTrack application records (authentication is not enabled)
 paths:
+  /gmail/analyze:
+    post:
+      operationId: analyzeGmail
+      summary: Analyze one email preview without saving it (development only)
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/GmailAnalysisInput"
+      responses:
+        "200":
+          description: Classification and nullable extracted fields for user review
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/GmailAnalysis"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "403":
+          description: Not available outside development
+        "429":
+          description: Analysis busy or provider rate limited
+        "502":
+          description: AI returned no valid analysis
+        "503":
+          description: AI service unavailable
   /gmail/connect:
     post:
       operationId: connectGmail
@@ -88,6 +115,14 @@ paths:
     post:
       operationId: createApplication
       tags: [applications]
+      parameters:
+        - in: header
+          name: X-JobTrack-Gmail-Review
+          required: false
+          description: Signed review token from Gmail analysis; enables idempotent import in development only
+          schema:
+            type: string
+            maxLength: 256
       requestBody:
         required: true
         content:
@@ -95,6 +130,12 @@ paths:
             schema:
               $ref: "#/components/schemas/ApplicationInput"
       responses:
+        "200":
+          description: Matching application already exists; returned unchanged
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
         "201":
           description: Created application
           content:
@@ -184,6 +225,49 @@ components:
           schema:
             $ref: "#/components/schemas/ApiError"
   schemas:
+    GmailAnalysisInput:
+      type: object
+      additionalProperties: false
+      required: [message]
+      properties:
+        message:
+          type: object
+          additionalProperties: false
+          required: [id, sender, subject, date, snippet]
+          properties:
+            id: { type: string, minLength: 1, maxLength: 256 }
+            sender: { type: string, maxLength: 1000 }
+            subject: { type: string, maxLength: 2000 }
+            date: { type: string, maxLength: 100 }
+            snippet: { type: string, maxLength: 10000 }
+    GmailAnalysis:
+      type: object
+      required: [relevant, reason, extraction, reviewToken]
+      properties:
+        relevant: { type: boolean }
+        reason: { type: string }
+        reviewToken: { type: [string, "null"] }
+        extraction:
+          $ref: "#/components/schemas/GmailExtraction"
+    GmailExtraction:
+      type: object
+      additionalProperties: false
+      required: [companyName, position, opportunityType, status, applicationDate, interviewDate, interviewType, interviewLocation, interviewNotes, jobUrl]
+      properties:
+        companyName: { type: [string, "null"] }
+        position: { type: [string, "null"] }
+        opportunityType:
+          type: [string, "null"]
+          enum: [Full-time, Part-time, Internship, Training, Train-to-Hire, Freelance, null]
+        status:
+          type: [string, "null"]
+          enum: [Saved, Applied, Under Review, Assessment, Interview, Technical Interview, Final Interview, Offer, Accepted, Rejected, Withdrawn, null]
+        applicationDate: { type: [string, "null"] }
+        interviewDate: { type: [string, "null"] }
+        interviewType: { type: [string, "null"] }
+        interviewLocation: { type: [string, "null"] }
+        interviewNotes: { type: [string, "null"] }
+        jobUrl: { type: [string, "null"] }
     GmailSearchInput:
       type: object
       properties:

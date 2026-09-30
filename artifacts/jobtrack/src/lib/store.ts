@@ -80,8 +80,11 @@ async function mutation<T>(work: () => Promise<T>): Promise<{ ok: true; value: T
 
 export const store = {
   refresh,
-  async create(input: ApplicationInput): Promise<SaveResult> {
-    const result = await mutation(() => request<Application>("", { method: "POST", body: JSON.stringify(clean(input)) }));
+  async create(input: ApplicationInput, reviewToken?: string): Promise<SaveResult> {
+    const result = await mutation(() => request<Application>("", {
+      method: "POST", body: JSON.stringify(clean(input)),
+      ...(reviewToken ? { headers: { "X-JobTrack-Gmail-Review": reviewToken } } : {}),
+    }));
     if (!result.ok) return result;
     version++;
     setState({ apps: [result.value, ...state.apps.filter((a) => a.id !== result.value.id)] });

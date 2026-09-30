@@ -1,0 +1,1 @@
+- [Structured AI schemas](structured-ai-schemas.md) — OpenAI structured output rejects Zod URI format; validate URLs server-side without emitting that format.

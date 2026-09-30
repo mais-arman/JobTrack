@@ -32,6 +32,8 @@ JobTrack is a personal tracker for jobs, internships, training, and other opport
 - Authentication is explicitly deferred. Applications are a shared collection, not private per-user records. Do not publish sensitive application data without adding access control.
 - Legacy browser records are retained only for downloadable backup, not merged or uploaded automatically. This avoids silently sharing previously local personal records.
 - Gmail uses the existing Replit-managed read-only connector in development preview only. No per-visitor OAuth is provided. Preview users share access to the connected mailbox; production endpoints must remain blocked until explicit access-control work is authorized. Searches are manual and previews are never persisted.
+- AI analysis is explicitly triggered per Gmail preview, runs server-side through Replit AI Integrations, and never saves records automatically. Required unknown fields must be completed by the reviewer. Only confirmed application fields and hashed import provenance persist.
+- Reviewed Gmail imports conservatively match normalized company + position, or an identical nonempty job URL, including manual entries. Matches return the existing record unchanged. Intentional repeat applications to the same role should use the manual creation flow.
 
 ## Product
 
@@ -39,7 +41,7 @@ Dashboard summaries, upcoming interviews, searchable and filterable applications
 
 ## User preferences
 
-Follow `.local/custom_skills/jobtrack-design-system/SKILL.md` for JobTrack UI work. Keep the MVP focused on application tracking and manual Gmail search; exclude daily routine, payments, social features, messaging, AI extraction, and advanced analytics.
+Follow `.local/custom_skills/jobtrack-design-system/SKILL.md` for JobTrack UI work. Keep the MVP focused on application tracking, manual Gmail search, and user-reviewed AI extraction; exclude daily routine, payments, social features, messaging, and advanced analytics.
 
 ## Gotchas
 

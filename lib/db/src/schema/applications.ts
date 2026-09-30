@@ -36,3 +36,9 @@ export const applicationsTable = pgTable("applications", {
 export const insertApplicationSchema = createInsertSchema(applicationsTable).omit({ id: true, createdAt: true, updatedAt: true });
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
 export type ApplicationRow = typeof applicationsTable.$inferSelect;
+
+// Only an opaque SHA-256 Gmail message key is retained; no message text or review token.
+export const gmailReviewImportsTable = pgTable("gmail_review_imports", {
+  messageKey: varchar("message_key", { length: 64 }).primaryKey(),
+  applicationId: uuid("application_id").notNull().references(() => applicationsTable.id, { onDelete: "cascade" }),
+});

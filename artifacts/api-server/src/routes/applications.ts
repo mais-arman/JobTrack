@@ -1,6 +1,7 @@
 import { Router, type IRouter } from "express";
-import { desc, eq } from "drizzle-orm";
-import { db, applicationsTable, type ApplicationRow } from "@workspace/db";
+import { desc, eq, or, sql } from "drizzle-orm";
+import { db, applicationsTable, gmailReviewImportsTable, type ApplicationRow } from "@workspace/db";
+import { verifyGmailReviewToken } from "../lib/gmail-review-token";
 import {
   CreateApplicationBody,
   CreateApplicationResponse,
@@ -92,10 +93,55 @@ router.get("/applications", async (_req, res): Promise<void> => {
 });
 
 router.post("/applications", async (req, res): Promise<void> => {
+  const reviewToken = req.get("X-JobTrack-Gmail-Review");
+  let messageKey: string | undefined;
+  if (reviewToken !== undefined) {
+    if (process.env.NODE_ENV !== "development" || process.env.REPLIT_DEPLOYMENT === "1") {
+      res.status(403).json({ error: "Gmail review imports are available only in the development preview." });
+      return;
+    }
+    try {
+      messageKey = verifyGmailReviewToken(reviewToken);
+    } catch {
+      res.status(400).json({ error: "Invalid or expired Gmail review token." });
+      return;
+    }
+  }
   const parsed = parseInput(req.body);
   if ("error" in parsed) {
     req.log.warn({ validationError: parsed.error }, "Invalid application input");
     res.status(400).json({ error: parsed.error });
+    return;
+  }
+  if (messageKey && parsed.data.source !== "Gmail") {
+    res.status(400).json({ error: "Gmail review imports require Gmail as the application source." });
+    return;
+  }
+  if (messageKey) {
+    const result = await db.transaction(async (tx) => {
+      // A transaction-scoped global import lock serializes both message-key and
+      // company/title/URL checks across concurrent reviewed imports.
+      await tx.execute(sql`SELECT pg_advisory_xact_lock(702461031, 1)`);
+      const [previous] = await tx.select({ application: applicationsTable })
+        .from(gmailReviewImportsTable)
+        .innerJoin(applicationsTable, eq(gmailReviewImportsTable.applicationId, applicationsTable.id))
+        .where(eq(gmailReviewImportsTable.messageKey, messageKey));
+      if (previous) return { row: previous.application, created: false };
+
+      const input = values(parsed.data);
+      const normalize = (column: typeof applicationsTable.companyName | typeof applicationsTable.position) =>
+        sql`lower(regexp_replace(btrim(${column}), '[[:space:]]+', ' ', 'g'))`;
+      const normalizedCompany = input.companyName.replace(/\s+/g, " ").toLowerCase();
+      const normalizedPosition = input.position.replace(/\s+/g, " ").toLowerCase();
+      const [existing] = await tx.select().from(applicationsTable).where(or(
+        sql`(${normalize(applicationsTable.companyName)} = ${normalizedCompany} AND ${normalize(applicationsTable.position)} = ${normalizedPosition})`,
+        ...(input.jobUrl ? [eq(applicationsTable.jobUrl, input.jobUrl)] : []),
+      )).orderBy(applicationsTable.createdAt, applicationsTable.id).limit(1);
+      const [row] = existing ? [existing] : await tx.insert(applicationsTable).values(input).returning();
+      await tx.insert(gmailReviewImportsTable).values({ messageKey, applicationId: row.id });
+      return { row, created: !existing };
+    });
+    res.status(result.created ? 201 : 200).json(CreateApplicationResponse.parse(entity(result.row)));
     return;
   }
   const [row] = await db.insert(applicationsTable).values(values(parsed.data)).returning();

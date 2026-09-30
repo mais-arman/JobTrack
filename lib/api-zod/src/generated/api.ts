@@ -9,6 +9,50 @@ import * as zod from 'zod';
 
 
 /**
+ * @summary Analyze one email preview without saving it (development only)
+ */
+export const analyzeGmailBodyMessageIdMax = 256;
+
+export const analyzeGmailBodyMessageSenderMax = 1000;
+
+export const analyzeGmailBodyMessageSubjectMax = 2000;
+
+export const analyzeGmailBodyMessageDateMax = 100;
+
+export const analyzeGmailBodyMessageSnippetMax = 10000;
+
+
+
+export const AnalyzeGmailBody = zod.object({
+  "message": zod.object({
+  "id": zod.string().min(1).max(analyzeGmailBodyMessageIdMax),
+  "sender": zod.string().max(analyzeGmailBodyMessageSenderMax),
+  "subject": zod.string().max(analyzeGmailBodyMessageSubjectMax),
+  "date": zod.string().max(analyzeGmailBodyMessageDateMax),
+  "snippet": zod.string().max(analyzeGmailBodyMessageSnippetMax)
+})
+})
+
+export const AnalyzeGmailResponse = zod.object({
+  "relevant": zod.boolean(),
+  "reason": zod.string(),
+  "reviewToken": zod.string().nullable(),
+  "extraction": zod.object({
+  "companyName": zod.string().nullable(),
+  "position": zod.string().nullable(),
+  "opportunityType": zod.union([zod.literal('Full-time'),zod.literal('Part-time'),zod.literal('Internship'),zod.literal('Training'),zod.literal('Train-to-Hire'),zod.literal('Freelance'),zod.literal(null)]).nullable(),
+  "status": zod.union([zod.literal('Saved'),zod.literal('Applied'),zod.literal('Under Review'),zod.literal('Assessment'),zod.literal('Interview'),zod.literal('Technical Interview'),zod.literal('Final Interview'),zod.literal('Offer'),zod.literal('Accepted'),zod.literal('Rejected'),zod.literal('Withdrawn'),zod.literal(null)]).nullable(),
+  "applicationDate": zod.string().nullable(),
+  "interviewDate": zod.string().nullable(),
+  "interviewType": zod.string().nullable(),
+  "interviewLocation": zod.string().nullable(),
+  "interviewNotes": zod.string().nullable(),
+  "jobUrl": zod.string().nullable()
+})
+})
+
+
+/**
  * @summary Verify the Replit Gmail connection (development only)
  */
 export const ConnectGmailResponse = zod.object({
@@ -82,6 +126,14 @@ export const ListApplicationsResponseItem = zod.object({
 })
 export const ListApplicationsResponse = zod.array(ListApplicationsResponseItem)
 
+
+export const createApplicationHeaderXJobTrackGmailReviewMax = 256;
+
+
+
+export const CreateApplicationHeader = zod.object({
+  "X-JobTrack-Gmail-Review": zod.string().max(createApplicationHeaderXJobTrackGmailReviewMax).optional().describe('Signed review token from Gmail analysis; enables idempotent import in development only')
+})
 
 export const createApplicationBodyCompanyNameMax = 255;
 

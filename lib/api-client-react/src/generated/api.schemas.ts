@@ -5,6 +5,92 @@
  * API specification
  * OpenAPI spec version: 0.1.0
  */
+export type GmailAnalysisInputMessage = {
+  /**
+     * @minLength 1
+     * @maxLength 256
+     */
+  id: string;
+  /** @maxLength 1000 */
+  sender: string;
+  /** @maxLength 2000 */
+  subject: string;
+  /** @maxLength 100 */
+  date: string;
+  /** @maxLength 10000 */
+  snippet: string;
+};
+
+export interface GmailAnalysisInput {
+  message: GmailAnalysisInputMessage;
+}
+
+/**
+ * @nullable
+ */
+export type GmailExtractionOpportunityType = typeof GmailExtractionOpportunityType[keyof typeof GmailExtractionOpportunityType] | null;
+
+
+export const GmailExtractionOpportunityType = {
+  'Full-time': 'Full-time',
+  'Part-time': 'Part-time',
+  Internship: 'Internship',
+  Training: 'Training',
+  'Train-to-Hire': 'Train-to-Hire',
+  Freelance: 'Freelance',
+} as const;
+
+/**
+ * @nullable
+ */
+export type GmailExtractionStatus = typeof GmailExtractionStatus[keyof typeof GmailExtractionStatus] | null;
+
+
+export const GmailExtractionStatus = {
+  Saved: 'Saved',
+  Applied: 'Applied',
+  Under_Review: 'Under Review',
+  Assessment: 'Assessment',
+  Interview: 'Interview',
+  Technical_Interview: 'Technical Interview',
+  Final_Interview: 'Final Interview',
+  Offer: 'Offer',
+  Accepted: 'Accepted',
+  Rejected: 'Rejected',
+  Withdrawn: 'Withdrawn',
+} as const;
+
+export interface GmailExtraction {
+  /** @nullable */
+  companyName: string | null;
+  /** @nullable */
+  position: string | null;
+  /** @nullable */
+  opportunityType: GmailExtractionOpportunityType;
+  /** @nullable */
+  status: GmailExtractionStatus;
+  /** @nullable */
+  applicationDate: string | null;
+  /** @nullable */
+  interviewDate: string | null;
+  /** @nullable */
+  interviewType: string | null;
+  /** @nullable */
+  interviewLocation: string | null;
+  /** @nullable */
+  interviewNotes: string | null;
+  /** @nullable */
+  jobUrl: string | null;
+}
+
+export interface GmailAnalysis {
+  relevant: boolean;
+  reason: string;
+  /** @nullable */
+  reviewToken: string | null;
+  extraction: GmailExtraction;
+}
+
 export interface GmailSearchInput {
   /** @maxLength 500 */
   query?: string;
