@@ -1,8 +1,8 @@
 import { type ReactNode, useState } from "react";
 import { Link, useLocation } from "wouter";
-import { LayoutGrid, ListChecks, Plus, HardDrive, AlertTriangle, X, Mail, PenLine } from "lucide-react";
+import { LayoutGrid, ListChecks, Plus, Database, AlertTriangle, X, Mail, PenLine } from "lucide-react";
 import { type Status, type Source, statusTone, type Tone } from "@/lib/domain";
-import { useStore } from "@/lib/store";
+import { legacyBackup, store, useStore } from "@/lib/store";
 import { cn } from "@/lib/utils";
 
 const toneClass: Record<Tone, string> = {
@@ -42,23 +42,42 @@ export function StorageBanner() {
   return (
     <div role="alert" className="mb-6 flex gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" data-testid="status-storage-error">
       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
-      <p>{loadError}</p>
+      <p>{loadError} <button onClick={() => { void store.refresh(true); }} className="font-semibold underline" data-testid="button-retry-applications">Try again</button></p>
+    </div>
+  );
+}
+
+function LegacyBanner() {
+  const [raw] = useState(legacyBackup);
+  if (!raw) return null;
+  const download = () => {
+    const url = URL.createObjectURL(new Blob([raw], { type: "application/json" }));
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = "jobtrack-browser-backup.json";
+    link.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  };
+  return (
+    <div className="mb-6 rounded-md border border-border bg-card p-4 text-sm" data-testid="notice-legacy-records">
+      <p><strong>Older browser records have not been imported.</strong> Your previous records remain untouched in this browser and are not included in the database totals. You can download a JSON backup. Database records are shared with anyone who can access this app; there is no sign-in. Keep the backup private.</p>
+      <button className="mt-2 font-semibold text-primary underline" onClick={download} data-testid="button-download-legacy-backup">Download browser records (JSON)</button>
     </div>
   );
 }
 
 function LocalNote() {
-  const [open, setOpen] = useState(() => { try { return localStorage.getItem("jobtrack.noteDismissed") !== "1"; } catch { return true; } });
+  const [open, setOpen] = useState(true);
   if (!open) return (
     <button onClick={() => setOpen(true)} className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground focus-visible:outline-2 focus-visible:outline-ring rounded" data-testid="button-show-storage-note">
-      <HardDrive className="h-3.5 w-3.5" /> Saved on this device only
+      <Database className="h-3.5 w-3.5" /> Saved in shared database
     </button>
   );
   return (
     <div className="relative rounded-md border border-border bg-card p-3 pr-8 text-xs leading-relaxed text-muted-foreground" data-testid="text-storage-note">
-      <HardDrive className="mb-1.5 h-4 w-4 text-[hsl(var(--brand-ink))]" aria-hidden />
-      Your records live only in this browser on this device. They won't sync elsewhere, and clearing site data will erase them.
-      <button aria-label="Hide storage note" onClick={() => { setOpen(false); try { localStorage.setItem("jobtrack.noteDismissed", "1"); } catch { /* ignore */ } }} className="absolute right-2 top-2 rounded p-0.5 hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring">
+      <Database className="mb-1.5 h-4 w-4 text-[hsl(var(--brand-ink))]" aria-hidden />
+      Applications are saved in a shared database, not only on this device. There is no sign-in: anyone with access to this app can view and change these records. Avoid sensitive details.
+      <button aria-label="Hide storage note" onClick={() => setOpen(false)} className="absolute right-2 top-2 rounded p-0.5 hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring">
         <X className="h-3.5 w-3.5" />
       </button>
     </div>
@@ -105,6 +124,7 @@ export function Shell({ children }: { children: ReactNode }) {
       <main id="main" className="min-w-0 px-4 pb-28 pt-6 sm:px-8 md:pb-16 md:pt-10 lg:px-12">
         <div className="mx-auto max-w-5xl">
           <StorageBanner />
+          <LegacyBanner />
           {children}
           <div className="mt-12 md:hidden"><LocalNote /></div>
         </div>

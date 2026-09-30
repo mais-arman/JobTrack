@@ -12,7 +12,7 @@ function greeting() {
 }
 
 export default function Dashboard() {
-  const { apps } = useStore();
+  const { apps, loading, loaded, loadError } = useStore();
   const stats = useMemo(() => {
     const byType = Object.fromEntries(OPPORTUNITY_TYPES.map((t) => [t, 0])) as Record<string, number>;
     const byStatus = Object.fromEntries(STATUSES.map((s) => [s, 0])) as Record<string, number>;
@@ -29,7 +29,7 @@ export default function Dashboard() {
         <Link href="/applications/new" className={btn.primary} data-testid="link-add-application"><Plus className="h-4 w-4" /> Add application</Link>
       </PageHeader>
 
-      {apps.length === 0 ? (
+      {!loaded && loading ? <p role="status" data-testid="status-loading-dashboard" className="text-sm text-muted-foreground">Loading applications…</p> : !loaded && loadError ? null : apps.length === 0 ? (
         <div className="rise relative overflow-hidden rounded-md border border-border bg-card p-8 sm:p-12" data-testid="empty-dashboard">
           <div className="relative max-w-md">
             <h2 className="text-2xl font-semibold">A clean page to start from.</h2>

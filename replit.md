@@ -22,12 +22,15 @@ JobTrack is a personal tracker for jobs, internships, training, and other opport
 
 ## Where things live
 
-_Populate as you build — short repo map plus pointers to the source-of-truth file for DB schema, API contracts, theme files, etc._
+- Application schema: `lib/db/src/schema/applications.ts`; development migrations: `lib/db/drizzle/`.
+- API contract: `lib/api-spec/openapi.yaml`; routes: `artifacts/api-server/src/routes/applications.ts`.
+- Frontend API store: `artifacts/jobtrack/src/lib/store.ts`.
 
 ## Architecture decisions
 
-- The initial MVP is browser-local with no sign-in or server-side application storage. This keeps personal records separate without adding account management to the core tracking scope. Records do not sync between devices and can be lost if browser storage is cleared.
-- The shared API service is not required by this frontend-only MVP.
+- PostgreSQL is the sole active source of application data, accessed through the shared Express API using Drizzle.
+- Authentication is explicitly deferred. Applications are a shared collection, not private per-user records. Do not publish sensitive application data without adding access control.
+- Legacy browser records are retained only for downloadable backup, not merged or uploaded automatically. This avoids silently sharing previously local personal records.
 - Gmail is a source label only, not a connected integration.
 
 ## Product

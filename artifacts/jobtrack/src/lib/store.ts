@@ -1,96 +1,158 @@
-import { useSyncExternalStore } from "react";
-import { type Application, type ApplicationInput, sanitize } from "./domain";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import { type Application, type ApplicationInput } from "./domain";
 
-const KEY = "jobtrack.applications.v1";
+const API = `${import.meta.env.BASE_URL.replace(/\/$/, "")}/api/applications`;
+const STALE_MS = 30_000;
+const LEGACY_KEY = "jobtrack.applications.v1";
 
 export type SaveResult = { ok: true; app?: Application } | { ok: false; error: string };
-
 interface State {
   apps: Application[];
+  loading: boolean;
   loadError: string | null;
-  available: boolean;
+  loaded: boolean;
 }
-
-function storageAvailable(): boolean {
-  try {
-    const k = "__jobtrack_probe__";
-    window.localStorage.setItem(k, "1");
-    window.localStorage.removeItem(k);
-    return true;
-  } catch { return false; }
-}
-
-function load(): State {
-  const available = storageAvailable();
-  if (!available) return { apps: [], available, loadError: "This browser is blocking local storage, so nothing can be saved. Private browsing or strict privacy settings often cause this." };
-  try {
-    const raw = window.localStorage.getItem(KEY);
-    if (!raw) return { apps: [], available, loadError: null };
-    const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed)) throw new Error("bad shape");
-    const apps = parsed.map(sanitize).filter((a): a is Application => !!a);
-    return { apps, available, loadError: null };
-  } catch {
-    return { apps: [], available, loadError: "Saved data in this browser could not be read. It has not been changed or deleted." };
-  }
-}
-
-let state: State = load();
+let state: State = { apps: [], loading: true, loaded: false, loadError: null };
+let loadedAt = 0;
+let version = 0;
+let pendingLoad: Promise<void> | null = null;
 const listeners = new Set<() => void>();
 const emit = () => listeners.forEach((l) => l());
+const setState = (patch: Partial<State>) => { state = { ...state, ...patch }; emit(); };
 
-function persist(next: Application[]): SaveResult {
-  if (state.loadError && state.available && window.localStorage.getItem(KEY)) {
-    return { ok: false, error: "Saving is paused because existing saved data could not be read. Nothing was overwritten." };
-  }
+async function request<T>(path: string, init?: RequestInit): Promise<T> {
+  let response: Response;
   try {
-    window.localStorage.setItem(KEY, JSON.stringify(next));
-  } catch (e) {
-    const quota = e instanceof DOMException && (e.name === "QuotaExceededError" || e.code === 22);
-    return { ok: false, error: quota ? "Browser storage is full. Your change was not saved." : "Your browser refused to save this change. It was not saved." };
+    response = await fetch(`${API}${path}`, {
+      ...init,
+      headers: { ...(init?.body ? { "Content-Type": "application/json" } : {}), ...init?.headers },
+    });
+  } catch {
+    throw new Error("Could not reach the database. Check your connection and try again.");
   }
-  state = { ...state, apps: next };
-  emit();
-  return { ok: true };
+  if (!response.ok) {
+    let detail = "";
+    try {
+      const body = await response.json() as { error?: string; message?: string };
+      detail = body.error || body.message || "";
+    } catch { /* response did not contain JSON */ }
+    throw new Error(response.status === 404
+      ? path ? "This application no longer exists." : "The applications service is unavailable (404). Please try again later."
+      : detail || `Request failed (${response.status}). Please try again.`);
+  }
+  if (response.status === 204) return undefined as T;
+  return response.json() as Promise<T>;
 }
 
-const uid = () => (typeof crypto !== "undefined" && "randomUUID" in crypto ? crypto.randomUUID() : `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 9)}`);
+function message(error: unknown) { return error instanceof Error ? error.message : "Something went wrong. Please try again."; }
+
+function refresh(force = false): Promise<void> {
+  if (pendingLoad) return pendingLoad;
+  if (!force && state.loaded && Date.now() - loadedAt < STALE_MS) return Promise.resolve();
+  const atStart = version;
+  setState({ loading: true, loadError: null });
+  pendingLoad = request<Application[]>("")
+    .then((apps) => {
+      if (!Array.isArray(apps)) throw new Error("The database returned an unexpected response.");
+      // Do not replace a mutation's confirmed result with an older in-flight list.
+      if (atStart === version) {
+        loadedAt = Date.now();
+        setState({ apps, loaded: true, loadError: null });
+      }
+    })
+    .catch((e: unknown) => setState({ loadError: message(e) }))
+    .finally(() => {
+      pendingLoad = null;
+      setState({ loading: false });
+      if (atStart !== version) void refresh(true);
+    });
+  return pendingLoad;
+}
 
 function clean(i: ApplicationInput): ApplicationInput {
   return { ...i, companyName: i.companyName.trim(), positionTitle: i.positionTitle.trim(), jobUrl: i.jobUrl.trim(), interviewLocation: i.interviewLocation.trim(), interviewType: i.interviewType.trim() };
 }
 
+async function mutation<T>(work: () => Promise<T>): Promise<{ ok: true; value: T } | { ok: false; error: string }> {
+  try { return { ok: true, value: await work() }; }
+  catch (e) { return { ok: false, error: message(e) }; }
+}
+
 export const store = {
-  create(input: ApplicationInput): SaveResult {
-    const now = new Date().toISOString();
-    const app: Application = { ...clean(input), id: uid(), createdAt: now, updatedAt: now };
-    const r = persist([app, ...state.apps]);
-    return r.ok ? { ok: true, app } : r;
+  refresh,
+  async create(input: ApplicationInput): Promise<SaveResult> {
+    const result = await mutation(() => request<Application>("", { method: "POST", body: JSON.stringify(clean(input)) }));
+    if (!result.ok) return result;
+    version++;
+    setState({ apps: [result.value, ...state.apps.filter((a) => a.id !== result.value.id)] });
+    return { ok: true, app: result.value };
   },
-  update(id: string, input: ApplicationInput): SaveResult {
-    const existing = state.apps.find((a) => a.id === id);
-    if (!existing) return { ok: false, error: "This application no longer exists." };
-    const app: Application = { ...existing, ...clean(input), updatedAt: new Date().toISOString() };
-    const r = persist(state.apps.map((a) => (a.id === id ? app : a)));
-    return r.ok ? { ok: true, app } : r;
+  async update(id: string, input: ApplicationInput): Promise<SaveResult> {
+    const result = await mutation(() => request<Application>(`/${encodeURIComponent(id)}`, { method: "PUT", body: JSON.stringify(clean(input)) }));
+    if (!result.ok) return result;
+    version++;
+    setState({ apps: state.apps.some((a) => a.id === id) ? state.apps.map((a) => a.id === id ? result.value : a) : [result.value, ...state.apps] });
+    return { ok: true, app: result.value };
   },
-  remove(id: string): SaveResult {
-    if (!state.apps.some((a) => a.id === id)) return { ok: false, error: "This application no longer exists." };
-    return persist(state.apps.filter((a) => a.id !== id));
+  async remove(id: string): Promise<SaveResult> {
+    const result = await mutation(() => request<void>(`/${encodeURIComponent(id)}`, { method: "DELETE" }));
+    if (!result.ok) return result;
+    version++;
+    setState({ apps: state.apps.filter((a) => a.id !== id) });
+    return { ok: true };
   },
 };
 
 if (typeof window !== "undefined") {
-  window.addEventListener("storage", (e) => {
-    if (e.key === KEY || e.key === null) { state = load(); emit(); }
-  });
+  window.addEventListener("focus", () => { void refresh(); });
 }
-
 const subscribe = (l: () => void) => { listeners.add(l); return () => { listeners.delete(l); }; };
 export function useStore(): State {
-  return useSyncExternalStore(subscribe, () => state, () => state);
+  const snapshot = useSyncExternalStore(subscribe, () => state, () => state);
+  useEffect(() => { void refresh(); }, []);
+  return snapshot;
 }
+
 export function useApplication(id: string | undefined) {
-  const s = useStore();
-  return s.apps.find((a) => a.id === id);
+  const snapshot = useStore();
+  const app = snapshot.apps.find((a) => a.id === id);
+  const [attempt, setAttempt] = useState(0);
+  // A direct URL may point to an entry not in the current list. Confirm with the detail endpoint.
+  useEffect(() => {
+    if (!id || !snapshot.loaded || app || snapshot.loadError) return;
+    let cancelled = false;
+    setDetail({ id, loading: true, error: null, notFound: false });
+    void request<Application>(`/${encodeURIComponent(id)}`).then((found) => {
+      if (cancelled) return;
+      setState({ apps: [...state.apps.filter((a) => a.id !== found.id), found] });
+      setDetail({ id, loading: false, error: null, notFound: false });
+    }).catch((e: unknown) => {
+      if (!cancelled) setDetail({ id, loading: false, error: message(e), notFound: e instanceof Error && e.message === "This application no longer exists." });
+    });
+    return () => { cancelled = true; };
+  }, [id, snapshot.loaded, snapshot.loadError, app, attempt]);
+  const detail = useSyncExternalStore(detailSubscribe, () => detailState, () => detailState);
+  return { app, loading: !snapshot.loaded && !snapshot.loadError || !app && snapshot.loaded && !snapshot.loadError && (detail.id !== id || detail.loading), error: snapshot.loadError || (detail.id === id ? detail.error : null), notFound: detail.id === id && detail.notFound, retry: () => {
+    setDetail({ id, loading: false, error: null, notFound: false });
+    void refresh(true);
+    setAttempt((n) => n + 1);
+  } };
+}
+
+interface DetailState { id: string | undefined; loading: boolean; error: string | null; notFound: boolean }
+let detailState: DetailState = { id: undefined, loading: false, error: null, notFound: false };
+const detailListeners = new Set<() => void>();
+const setDetail = (d: DetailState) => { detailState = d; detailListeners.forEach((l) => l()); };
+const detailSubscribe = (l: () => void) => { detailListeners.add(l); return () => { detailListeners.delete(l); }; };
+
+export function legacyBackup(): string | null {
+  try {
+    const raw = window.localStorage.getItem(LEGACY_KEY);
+    if (!raw) return null;
+    try {
+      const value: unknown = JSON.parse(raw);
+      if (Array.isArray(value) && value.length === 0) return null;
+    } catch { /* Preserve unreadable legacy data for backup rather than discarding it. */ }
+    return raw;
+  } catch { return null; }
 }

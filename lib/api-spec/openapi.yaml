@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: applications
+    description: Shared JobTrack application records (authentication is not enabled)
 paths:
   /healthz:
     get:
@@ -24,8 +26,165 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /applications:
+    get:
+      operationId: listApplications
+      tags: [applications]
+      responses:
+        "200":
+          description: All applications, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Application"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    post:
+      operationId: createApplication
+      tags: [applications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationInput"
+      responses:
+        "201":
+          description: Created application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "500":
+          $ref: "#/components/responses/ServerError"
+  /applications/{id}:
+    parameters:
+      - in: path
+        name: id
+        required: true
+        schema:
+          type: string
+          format: uuid
+    get:
+      operationId: getApplication
+      tags: [applications]
+      responses:
+        "200":
+          description: Application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    put:
+      operationId: updateApplication
+      tags: [applications]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationInput"
+      responses:
+        "200":
+          description: Updated application
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Application"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
+    delete:
+      operationId: deleteApplication
+      tags: [applications]
+      responses:
+        "204":
+          description: Deleted
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "500":
+          $ref: "#/components/responses/ServerError"
 components:
+  responses:
+    BadRequest:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    NotFound:
+      description: Application not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
+    ServerError:
+      description: Unexpected server error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ApiError"
   schemas:
+    ApiError:
+      type: object
+      required: [error]
+      properties:
+        error: { type: string }
+    ApplicationInput:
+      type: object
+      additionalProperties: false
+      required: [companyName, positionTitle, opportunityType, workMode, applicationDate, status, interviewDate, interviewTime, interviewType, interviewLocation, interviewNotes, jobUrl, notes, source]
+      properties:
+        companyName: { type: string, minLength: 1, maxLength: 255 }
+        positionTitle: { type: string, minLength: 1, maxLength: 255 }
+        opportunityType: { type: string, enum: [Full-time, Part-time, Internship, Training, Train-to-Hire, Freelance] }
+        workMode: { type: string, enum: [On-site, Remote, Hybrid] }
+        applicationDate: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$', description: Local calendar date (YYYY-MM-DD) }
+        status: { type: string, enum: [Saved, Applied, Under Review, Assessment, Interview, Technical Interview, Final Interview, Offer, Accepted, Rejected, Withdrawn] }
+        interviewDate: { type: string, description: Empty string or YYYY-MM-DD }
+        interviewTime: { type: string, description: Empty string or HH:MM }
+        interviewType: { type: string, maxLength: 255 }
+        interviewLocation: { type: string, maxLength: 2048 }
+        interviewNotes: { type: string }
+        jobUrl: { type: string, maxLength: 2048, description: Empty string or an http(s) URL }
+        notes: { type: string }
+        source: { type: string, enum: [Manual, Gmail] }
+    Application:
+      type: object
+      required: [id, companyName, positionTitle, opportunityType, workMode, applicationDate, status, interviewDate, interviewTime, interviewType, interviewLocation, interviewNotes, jobUrl, notes, source, createdAt, updatedAt]
+      properties:
+        id: { type: string, format: uuid }
+        companyName: { type: string, minLength: 1, maxLength: 255 }
+        positionTitle: { type: string, minLength: 1, maxLength: 255 }
+        opportunityType: { type: string, enum: [Full-time, Part-time, Internship, Training, Train-to-Hire, Freelance] }
+        workMode: { type: string, enum: [On-site, Remote, Hybrid] }
+        applicationDate: { type: string, pattern: '^\d{4}-\d{2}-\d{2}$' }
+        status: { type: string, enum: [Saved, Applied, Under Review, Assessment, Interview, Technical Interview, Final Interview, Offer, Accepted, Rejected, Withdrawn] }
+        interviewDate: { type: string }
+        interviewTime: { type: string }
+        interviewType: { type: string, maxLength: 255 }
+        interviewLocation: { type: string, maxLength: 2048 }
+        interviewNotes: { type: string }
+        jobUrl: { type: string, maxLength: 2048 }
+        notes: { type: string }
+        source: { type: string, enum: [Manual, Gmail] }
+        createdAt: { type: string, description: Server-owned ISO 8601 timestamp }
+        updatedAt: { type: string, description: Server-owned ISO 8601 timestamp }
     HealthStatus:
       type: object
       properties:

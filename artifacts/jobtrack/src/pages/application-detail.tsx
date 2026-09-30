@@ -34,36 +34,51 @@ function Maybe({ value, link }: { value: string; link?: boolean }) {
 
 export default function ApplicationDetail() {
   const params = useParams<{ id: string }>();
-  const app = useApplication(params.id);
+  const { app, loading, error, notFound, retry } = useApplication(params.id);
   const [, navigate] = useLocation();
   const { toast } = useToast();
   const [editing, setEditing] = useState(false);
   const [confirm, setConfirm] = useState(false);
   const [actionError, setActionError] = useState<string | null>(null);
+  const [actionBusy, setActionBusy] = useState(false);
+
+  if (!app && loading) return <p role="status" className="py-16 text-center text-sm text-muted-foreground" data-testid="status-loading-detail">Loading application…</p>;
+  if (!app && error && !notFound) return (
+    <div role="alert" className="mx-auto max-w-md py-16 text-center">
+      <p className="text-sm text-destructive" data-testid="status-detail-error">{error}</p>
+      <button className={`${btn.ghost} mt-5`} onClick={retry} data-testid="button-retry-detail">Try again</button>
+    </div>
+  );
 
   if (!app) {
     return (
       <div className="rise mx-auto max-w-md py-16 text-center" data-testid="empty-missing">
         <FileQuestion className="mx-auto h-10 w-10 text-muted-foreground" aria-hidden />
         <h1 className="mt-4 text-2xl font-semibold">This application isn't here</h1>
-        <p className="mt-2 text-sm text-muted-foreground">It may have been deleted, or it was saved in a different browser. Records only exist on the device where they were created.</p>
+        <p className="mt-2 text-sm text-muted-foreground">It may have been deleted or its link may be incorrect.</p>
         <Link href="/applications" className={`${btn.primary} mt-6`} data-testid="link-back-list">Back to applications</Link>
       </div>
     );
   }
 
-  const changeStatus = (s: Status) => {
+  const changeStatus = async (s: Status) => {
+    if (actionBusy) return;
     setActionError(null);
-    const r = store.update(app.id, { ...toInput(app), status: s });
+    setActionBusy(true);
+    const r = await store.update(app.id, { ...toInput(app), status: s });
+    setActionBusy(false);
     if (r.ok) toast({ title: "Status updated", description: `Now marked ${s}.` });
     else setActionError(r.error);
   };
-  const doDelete = () => {
+  const doDelete = async () => {
+    if (actionBusy) return;
     const name = app.companyName;
-    const r = store.remove(app.id);
-    setConfirm(false);
+    setActionBusy(true);
+    setActionError(null);
+    const r = await store.remove(app.id);
+    setActionBusy(false);
     if (r.ok) { toast({ title: "Application deleted", description: `${name} was removed.` }); navigate("/applications"); }
-    else setActionError(r.error);
+    else { setActionError(r.error); setConfirm(false); }
   };
 
   if (editing) {
@@ -72,8 +87,8 @@ export default function ApplicationDetail() {
         <button onClick={() => setEditing(false)} className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground" data-testid="button-back-detail"><ArrowLeft className="h-4 w-4" /> Back to details</button>
         <PageHeader eyebrow="Editing" title={app.companyName} />
         <ApplicationForm initial={toInput(app)} submitLabel="Save changes" onCancel={() => setEditing(false)}
-          onSubmit={(v) => {
-            const r = store.update(app.id, v);
+          onSubmit={async (v) => {
+            const r = await store.update(app.id, v);
             if (r.ok) { toast({ title: "Changes saved" }); setEditing(false); window.scrollTo({ top: 0 }); }
             return r;
           }} />
@@ -89,8 +104,8 @@ export default function ApplicationDetail() {
     <>
       <Link href="/applications" className="mb-4 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground" data-testid="link-back"><ArrowLeft className="h-4 w-4" /> Applications</Link>
       <PageHeader eyebrow={`${app.opportunityType} · ${app.workMode}`} title={<span data-testid="text-company">{app.companyName}</span>}>
-        <button className={btn.ghost} onClick={() => setEditing(true)} data-testid="button-edit"><Pencil className="h-4 w-4" /> Edit</button>
-        <button className={btn.danger} onClick={() => setConfirm(true)} data-testid="button-delete"><Trash2 className="h-4 w-4" /> Delete</button>
+        <button className={btn.ghost} disabled={actionBusy} onClick={() => setEditing(true)} data-testid="button-edit"><Pencil className="h-4 w-4" /> Edit</button>
+        <button className={btn.danger} disabled={actionBusy} onClick={() => setConfirm(true)} data-testid="button-delete"><Trash2 className="h-4 w-4" /> Delete</button>
       </PageHeader>
       <p className="-mt-6 mb-6 text-lg text-muted-foreground" data-testid="text-position">{app.positionTitle}</p>
 
@@ -147,7 +162,7 @@ export default function ApplicationDetail() {
           <div className="rounded-md border border-border bg-card p-5">
             <label htmlFor="quick-status" className="text-sm font-medium">Quick status update</label>
             <p className="mb-3 mt-0.5 text-xs text-muted-foreground">Saves immediately.</p>
-            <select id="quick-status" value={app.status} onChange={(e) => changeStatus(e.target.value as Status)} data-testid="select-quick-status"
+            <select id="quick-status" value={app.status} disabled={actionBusy} onChange={(e) => { void changeStatus(e.target.value as Status); }} data-testid="select-quick-status"
               className="w-full rounded-lg border border-input bg-background px-3 py-2.5 text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12">
               {STATUSES.map((s) => <option key={s}>{s}</option>)}
             </select>
@@ -158,15 +173,15 @@ export default function ApplicationDetail() {
         </aside>
       </div>
 
-      <AlertDialog open={confirm} onOpenChange={setConfirm}>
+      <AlertDialog open={confirm} onOpenChange={(open) => { if (!actionBusy) setConfirm(open); }}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle className="font-serif">Delete this application?</AlertDialogTitle>
-            <AlertDialogDescription>{app.companyName} — {app.positionTitle} will be permanently removed from this browser. This can't be undone.</AlertDialogDescription>
+            <AlertDialogDescription>{app.companyName} — {app.positionTitle} will be permanently removed from the shared database. This can't be undone.</AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel data-testid="button-cancel-delete">Keep it</AlertDialogCancel>
-            <AlertDialogAction onClick={doDelete} className="bg-destructive text-destructive-foreground hover:bg-destructive/90" data-testid="button-confirm-delete">Delete</AlertDialogAction>
+            <AlertDialogCancel disabled={actionBusy} data-testid="button-cancel-delete">Keep it</AlertDialogCancel>
+            <AlertDialogAction disabled={actionBusy} onClick={(e) => { e.preventDefault(); void doDelete(); }} className="bg-destructive text-destructive-foreground hover:bg-destructive/90" data-testid="button-confirm-delete">{actionBusy ? "Deleting…" : "Delete"}</AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>

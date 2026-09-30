@@ -17,8 +17,8 @@ export default function ApplicationNew() {
         initial={emptyInput()}
         submitLabel="Save application"
         onCancel={() => navigate("/applications")}
-        onSubmit={(v) => {
-          const r = store.create(v);
+        onSubmit={async (v) => {
+          const r = await store.create(v);
           if (r.ok && r.app) {
             toast({ title: "Application saved", description: `${r.app.companyName} is now on your list.` });
             navigate(`/applications/${r.app.id}`);

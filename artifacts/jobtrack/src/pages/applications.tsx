@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 const selCls = "rounded-lg border border-input bg-card px-3 py-2 text-sm focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12";
 
 export default function Applications() {
-  const { apps } = useStore();
+  const { apps, loading, loaded, loadError } = useStore();
   const search = useSearch();
   const [, navigate] = useLocation();
   const params = useMemo(() => new URLSearchParams(search), [search]);
@@ -75,7 +75,7 @@ export default function Applications() {
         {active ? `${filtered.length} of ${apps.length} match` : `Showing all ${apps.length}`}
       </p>}
 
-      {apps.length === 0 ? (
+      {!loaded && loading ? <p role="status" data-testid="status-loading-applications" className="text-sm text-muted-foreground">Loading applications…</p> : !loaded && loadError ? null : apps.length === 0 ? (
         <div className="rise rounded-md border border-dashed border-border bg-card/60 px-6 py-16 text-center" data-testid="empty-applications">
           <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-accent text-accent-foreground"><Plus className="h-5 w-5" /></div>
           <h2 className="text-xl font-semibold">Nothing tracked yet</h2>

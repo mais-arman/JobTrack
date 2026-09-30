@@ -37,7 +37,7 @@ function Section({ n, title, children }: { n: string; title: string; children: R
 }
 
 export function ApplicationForm({ initial, submitLabel, onSubmit, onCancel }: {
-  initial: ApplicationInput; submitLabel: string; onSubmit: (v: ApplicationInput) => SaveResult; onCancel: () => void;
+  initial: ApplicationInput; submitLabel: string; onSubmit: (v: ApplicationInput) => Promise<SaveResult>; onCancel: () => void;
 }) {
   const [v, setV] = useState<ApplicationInput>(initial);
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -53,17 +53,23 @@ export function ApplicationForm({ initial, submitLabel, onSubmit, onCancel }: {
     id: k, name: k, "aria-invalid": !!errors[k], "aria-describedby": errors[k] ? `${k}-err` : undefined, "data-testid": `input-${k}`,
   });
 
-  const submit = (e: React.FormEvent) => {
+  const submit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (busy) return;
     setSaveError(null);
     const errs = validate(v);
     setErrors(errs);
     const first = Object.keys(errs).find((k) => errs[k as keyof FieldErrors]);
     if (first) { formRef.current?.querySelector<HTMLElement>(`#${first}`)?.focus(); return; }
     setBusy(true);
-    const r = onSubmit(v);
-    setBusy(false);
-    if (!r.ok) setSaveError(r.error);
+    try {
+      const r = await onSubmit(v);
+      if (!r.ok) setSaveError(r.error);
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Your change could not be saved. Please try again.");
+    } finally {
+      setBusy(false);
+    }
   };
 
   const hasInterview = !!(v.interviewDate || v.interviewTime || v.interviewType || v.interviewLocation || v.interviewNotes);
@@ -144,7 +150,7 @@ export function ApplicationForm({ initial, submitLabel, onSubmit, onCancel }: {
       )}
 
       <div className="sticky bottom-16 z-10 -mx-4 flex justify-end gap-2 border-t border-border bg-background/90 px-4 py-3 backdrop-blur md:bottom-0 sm:mx-0 sm:rounded-xl sm:border sm:px-3">
-        <button type="button" className={btn.ghost} onClick={onCancel} data-testid="button-cancel">Cancel</button>
+        <button type="button" className={btn.ghost} onClick={onCancel} disabled={busy} data-testid="button-cancel">Cancel</button>
         <button type="submit" className={btn.primary} disabled={busy} data-testid="button-submit">
           {busy && <Loader2 className="h-4 w-4 animate-spin" />} {submitLabel}
         </button>

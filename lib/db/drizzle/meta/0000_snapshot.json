@@ -1,0 +1,212 @@
+{
+  "id": "3927289f-5b04-4bc6-b466-e3226439b852",
+  "prevId": "00000000-0000-0000-0000-000000000000",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.applications": {
+      "name": "applications",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "company_name": {
+          "name": "company_name",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "position": {
+          "name": "position",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "opportunity_type": {
+          "name": "opportunity_type",
+          "type": "application_opportunity_type",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "work_mode": {
+          "name": "work_mode",
+          "type": "application_work_mode",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "application_date": {
+          "name": "application_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "application_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "job_url": {
+          "name": "job_url",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "notes": {
+          "name": "notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "source": {
+          "name": "source",
+          "type": "application_source",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'Manual'"
+        },
+        "interview_date": {
+          "name": "interview_date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "interview_time": {
+          "name": "interview_time",
+          "type": "varchar(5)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "interview_type": {
+          "name": "interview_type",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "interview_location": {
+          "name": "interview_location",
+          "type": "varchar(2048)",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "interview_notes": {
+          "name": "interview_notes",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "''"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {
+        "applications_company_nonblank": {
+          "name": "applications_company_nonblank",
+          "value": "length(btrim(\"applications\".\"company_name\")) > 0"
+        },
+        "applications_position_nonblank": {
+          "name": "applications_position_nonblank",
+          "value": "length(btrim(\"applications\".\"position\")) > 0"
+        },
+        "applications_interview_time_valid": {
+          "name": "applications_interview_time_valid",
+          "value": "\"applications\".\"interview_time\" ~ '^([01][0-9]|2[0-3]):[0-5][0-9]$' OR \"applications\".\"interview_time\" = ''"
+        },
+        "applications_interview_time_requires_date": {
+          "name": "applications_interview_time_requires_date",
+          "value": "\"applications\".\"interview_time\" = '' OR \"applications\".\"interview_date\" IS NOT NULL"
+        }
+      },
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.application_source": {
+      "name": "application_source",
+      "schema": "public",
+      "values": [
+        "Manual",
+        "Gmail"
+      ]
+    },
+    "public.application_status": {
+      "name": "application_status",
+      "schema": "public",
+      "values": [
+        "Saved",
+        "Applied",
+        "Under Review",
+        "Assessment",
+        "Interview",
+        "Technical Interview",
+        "Final Interview",
+        "Offer",
+        "Accepted",
+        "Rejected",
+        "Withdrawn"
+      ]
+    },
+    "public.application_opportunity_type": {
+      "name": "application_opportunity_type",
+      "schema": "public",
+      "values": [
+        "Full-time",
+        "Part-time",
+        "Internship",
+        "Training",
+        "Train-to-Hire",
+        "Freelance"
+      ]
+    },
+    "public.application_work_mode": {
+      "name": "application_work_mode",
+      "schema": "public",
+      "values": [
+        "On-site",
+        "Remote",
+        "Hybrid"
+      ]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

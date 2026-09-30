@@ -1,0 +1,89 @@
+Now implement database-backed storage for JobTrack applications.
+
+IMPORTANT:
+- Use the existing PostgreSQL and Drizzle ORM infrastructure already present in the project.
+- Do not introduce another database technology.
+- Do not rebuild the UI.
+- Do not change the existing JobTrack design or functionality unless necessary.
+- Preserve the existing application fields and user experience.
+
+First, inspect the existing database configuration and project structure.
+
+Then implement the following:
+
+1. DATABASE SCHEMA
+Create an Application table using Drizzle ORM in the existing database schema location.
+
+The Application table should support:
+
+- id
+- companyName
+- position
+- opportunityType
+- workMode
+- applicationDate
+- status
+- jobUrl
+- notes
+- source
+- interviewDate
+- interviewType
+- interviewLocation
+- interviewNotes
+- createdAt
+- updatedAt
+
+Use appropriate PostgreSQL data types and constraints.
+
+2. DATABASE MIGRATION
+Create and apply the appropriate Drizzle migration so the Application table exists in PostgreSQL.
+
+3. SERVER/API
+Create the necessary server-side API endpoints for:
+- Get all applications
+- Get one application by id
+- Create an application
+- Update an application
+- Delete an application
+
+4. FRONTEND
+Replace the current localStorage-based application store with the new database-backed API.
+
+The existing pages should continue to work:
+- Dashboard
+- Applications
+- Add Application
+- Application Details
+- Edit Application
+- Delete Application
+- Filters
+
+5. DASHBOARD
+Make sure dashboard statistics are calculated from the database-backed applications.
+
+6. ERROR HANDLING
+Handle API/database errors properly and show appropriate feedback to the user.
+
+7. LOCALSTORAGE
+Remove localStorage as the primary source of application data.
+Do not keep two competing sources of truth.
+
+8. TESTING
+After implementation, verify:
+- Creating an application saves it to PostgreSQL.
+- Refreshing the page keeps the application.
+- Editing an application updates PostgreSQL.
+- Deleting an application removes it from PostgreSQL.
+- Dashboard statistics reflect the database.
+- Filters work with database-backed data.
+
+Before making architectural changes, inspect the existing code and reuse the current project structure where possible.
+
+After completing the implementation, explain:
+- Which files were changed
+- What database table was created
+- What API endpoints were added
+- How the frontend now communicates with PostgreSQL
+- How you verified that CRUD operations work
+
+Do not implement Gmail integration, Clerk authentication, or the daily Routine yet.
