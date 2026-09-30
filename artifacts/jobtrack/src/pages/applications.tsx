@@ -64,7 +64,7 @@ export default function Applications() {
             </select>
           </div>
           {active && (
-            <button onClick={reset} className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm text-[hsl(14_55%_40%)] hover:bg-accent focus-visible:outline-2 focus-visible:outline-ring" data-testid="button-reset-filters">
+            <button onClick={reset} className="inline-flex items-center justify-center gap-1.5 rounded-lg px-3 py-2 text-sm text-foreground hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring" data-testid="button-reset-filters">
               <RotateCcw className="h-3.5 w-3.5" /> Reset
             </button>
           )}
@@ -94,14 +94,14 @@ export default function Applications() {
           {filtered.map((a, i) => (
             <li key={a.id} className="rise" style={{ animationDelay: `${Math.min(i, 10) * 30}ms` }}>
               <Link href={`/applications/${a.id}`} data-testid={`card-application-${a.id}`}
-                className="group grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-px hover:border-[hsl(186_30%_70%)] hover:shadow-[0_8px_20px_-14px_hsl(186_40%_20%/.5)] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:grid-cols-[1fr_auto_auto] sm:px-5">
+                className="group grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-px hover:border-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:grid-cols-[1fr_auto_auto] sm:px-5">
                 <div className="min-w-0">
                   <p className="truncate font-medium">{a.companyName}</p>
                   <p className="truncate text-sm text-muted-foreground">{a.positionTitle}</p>
                   <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
                     <span>{a.opportunityType}</span><span aria-hidden>·</span><span>{a.workMode}</span><span aria-hidden>·</span>
                     <span>Applied {formatDate(a.applicationDate)}</span>
-                    {a.interviewDate && <span className="inline-flex items-center gap-1 text-[hsl(28_70%_35%)]"><CalendarClock className="h-3 w-3" />{formatDate(a.interviewDate, { month: "short", day: "numeric" })} {formatTime(a.interviewTime)}</span>}
+                    {a.interviewDate && <span className="inline-flex items-center gap-1 text-[hsl(var(--brand-ink))]"><CalendarClock className="h-3 w-3" />{formatDate(a.interviewDate, { month: "short", day: "numeric" })} {formatTime(a.interviewTime)}</span>}
                     <SourceTag source={a.source} />
                   </p>
                 </div>

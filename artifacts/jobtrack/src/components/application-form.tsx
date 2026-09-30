@@ -7,7 +7,7 @@ import type { SaveResult } from "@/lib/store";
 import { btn } from "./jt";
 import { cn } from "@/lib/utils";
 
-const inputCls = "w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 transition-shadow focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/12 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/10";
+const inputCls = "w-full rounded-lg border border-input bg-card px-3 py-2.5 text-sm text-foreground placeholder:text-muted-foreground/70 transition-shadow focus:outline-none focus:border-primary focus:ring-4 focus:ring-primary/25 aria-[invalid=true]:border-destructive aria-[invalid=true]:ring-destructive/10";
 
 function Field({ id, label, hint, error, optional, children, className }: { id: string; label: string; hint?: string; error?: string; optional?: boolean; children: ReactNode; className?: string }) {
   return (
@@ -27,8 +27,8 @@ function Section({ n, title, children }: { n: string; title: string; children: R
     <fieldset className="grid gap-5 border-t border-border pt-6 sm:grid-cols-[160px_1fr]">
       <legend className="contents">
         <span className="flex gap-3 sm:flex-col sm:gap-1">
-          <span className="font-mono text-xs text-[hsl(14_55%_48%)]">{n}</span>
-          <span className="font-serif text-lg font-semibold">{title}</span>
+          <span className="font-mono text-xs text-[hsl(var(--brand-ink))]">{n}</span>
+          <span className="text-base font-semibold">{title}</span>
         </span>
       </legend>
       <div className="grid gap-5 sm:grid-cols-2">{children}</div>

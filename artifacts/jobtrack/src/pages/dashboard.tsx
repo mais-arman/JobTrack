@@ -31,8 +31,6 @@ export default function Dashboard() {
 
       {apps.length === 0 ? (
         <div className="rise relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-12" data-testid="empty-dashboard">
-          <div aria-hidden className="absolute -right-16 -top-16 h-56 w-56 rounded-full bg-[hsl(14_62%_92%)]" />
-          <div aria-hidden className="absolute -right-4 top-20 h-24 w-24 rounded-full border-2 border-dashed border-[hsl(186_40%_70%)]" />
           <div className="relative max-w-md">
             <h2 className="text-2xl font-semibold">A clean page to start from.</h2>
             <p className="mt-3 text-muted-foreground">Add the first role you've applied to — or one you're saving for later. Your totals, status counts and upcoming interviews will fill in here as you go.</p>
@@ -47,9 +45,9 @@ export default function Dashboard() {
               { label: "Still open", value: stats.open, id: "open" },
               { label: "Closed", value: stats.closed, id: "closed" },
             ].map((s, i) => (
-              <div key={s.id} className={cn("p-5 sm:p-7", i > 0 && "border-l border-border", i === 0 && "bg-primary text-primary-foreground")}>
-                <p className={cn("font-mono text-[10px] uppercase tracking-[0.16em] sm:text-[11px]", i === 0 ? "text-primary-foreground/70" : "text-muted-foreground")}>{s.label}</p>
-                <p className="mt-2 font-serif text-4xl font-semibold tabular-nums sm:text-5xl" data-testid={`text-count-${s.id}`}>{s.value}</p>
+              <div key={s.id} className={cn("p-5 sm:p-7", i > 0 && "border-l border-border", i === 0 && "bg-accent text-accent-foreground")}>
+                <p className={cn("font-mono text-[10px] uppercase tracking-[0.16em] sm:text-[11px]", i === 0 ? "text-accent-foreground/80" : "text-muted-foreground")}>{s.label}</p>
+                <p className="mt-2 text-4xl font-semibold tabular-nums sm:text-5xl" data-testid={`text-count-${s.id}`}>{s.value}</p>
               </div>
             ))}
           </section>
@@ -72,14 +70,14 @@ export default function Dashboard() {
                     <li key={app.id}>
                       <Link href={`/applications/${app.id}`} data-testid={`link-upcoming-${app.id}`} className="group flex gap-4 rounded-xl p-3 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring">
                         <div className="flex w-12 shrink-0 flex-col items-center rounded-lg border border-border bg-background py-1.5">
-                          <span className="font-mono text-[10px] uppercase text-[hsl(14_55%_45%)]">{formatDate(app.interviewDate, { month: "short" })}</span>
-                          <span className="font-serif text-xl font-semibold leading-tight">{formatDate(app.interviewDate, { day: "numeric" })}</span>
+                          <span className="font-mono text-[10px] uppercase text-[hsl(var(--brand-ink))]">{formatDate(app.interviewDate, { month: "short" })}</span>
+                          <span className="text-xl font-semibold leading-tight">{formatDate(app.interviewDate, { day: "numeric" })}</span>
                         </div>
                         <div className="min-w-0 flex-1">
                           <p className="truncate font-medium">{app.companyName}</p>
                           <p className="truncate text-sm text-muted-foreground">{app.positionTitle}</p>
                           <p className="mt-1 flex flex-wrap items-center gap-x-2 text-xs text-muted-foreground">
-                            {rel && <span className="font-medium text-[hsl(28_70%_38%)]">{rel}</span>}
+                            {rel && <span className="font-medium text-[hsl(var(--brand-ink))]">{rel}</span>}
                             {app.interviewTime && <span>{formatTime(app.interviewTime)}</span>}
                             {app.interviewType && <span>· {app.interviewType}</span>}
                             {app.interviewLocation && <span className="inline-flex min-w-0 items-center gap-1 truncate"><MapPin className="h-3 w-3" />{app.interviewLocation}</span>}
@@ -124,7 +122,7 @@ export default function Dashboard() {
                           <span>{t}</span><span className="font-mono tabular-nums" data-testid={`text-type-count-${t}`}>{n}</span>
                         </div>
                         <div className="mt-1.5 h-1 rounded-full bg-muted" aria-hidden>
-                          <div className="h-full origin-left rounded-full bg-[hsl(14_62%_58%)] transition-transform duration-500" style={{ transform: `scaleX(${n / maxType})` }} />
+                          <div className="h-full origin-left rounded-full bg-primary transition-transform duration-500" style={{ transform: `scaleX(${n / maxType})` }} />
                         </div>
                       </Link>
                     </li>

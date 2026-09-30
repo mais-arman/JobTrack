@@ -119,7 +119,7 @@ export default function ApplicationDetail() {
           <section className="rise rounded-2xl border border-border bg-card p-5 sm:p-6" aria-labelledby="d-int" style={{ animationDelay: "60ms" }}>
             <div className="mb-2 flex items-center justify-between">
               <h2 id="d-int" className="text-lg font-semibold">Interview</h2>
-              {when && <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${past ? "bg-muted text-muted-foreground" : isClosed(app.status) ? "bg-muted text-muted-foreground" : "bg-[hsl(38_85%_90%)] text-[hsl(28_70%_30%)]"}`}>{past ? "Past" : isClosed(app.status) ? "Closed" : "Upcoming"}</span>}
+              {when && <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${past ? "bg-muted text-muted-foreground" : isClosed(app.status) ? "bg-muted text-muted-foreground" : "bg-accent text-accent-foreground"}`}>{past ? "Past" : isClosed(app.status) ? "Closed" : "Upcoming"}</span>}
             </div>
             {!hasInterview ? (
               <div className="flex items-center gap-3 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground" data-testid="empty-interview">
