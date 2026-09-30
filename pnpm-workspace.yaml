@@ -43,6 +43,8 @@ onlyBuiltDependencies:
   - unrs-resolver
 
 overrides:
+  'brace-expansion@5.0.9': 5.0.12
+  'fast-uri@3.1.7': 3.1.8
   '@esbuild-kit/esm-loader': npm:tsx@^4.21.0
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-arm64': '-'
   '@expo/ngrok-bin>@expo/ngrok-bin-darwin-x64': '-'
