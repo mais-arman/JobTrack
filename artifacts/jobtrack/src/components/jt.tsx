@@ -20,7 +20,8 @@ export const toneDot: Record<Tone, string> = {
 
 export function StatusBadge({ status, className }: { status: Status; className?: string }) {
   return (
-    <span data-testid="status-badge" className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2.5 py-0.5 text-xs font-medium ring-1 ring-inset", toneClass[statusTone(status)], className)}>
+    <span data-testid="status-badge" className={cn("inline-flex items-center gap-1.5 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-medium ring-1 ring-inset", toneClass[statusTone(status)], className)}>
+      <span aria-hidden className={cn("h-1.5 w-1.5 rounded-full", statusTone(status) === "closed-good" ? "bg-white" : toneDot[statusTone(status)])} />
       {status}
     </span>
   );
@@ -39,7 +40,7 @@ export function StorageBanner() {
   const { loadError } = useStore();
   if (!loadError) return null;
   return (
-    <div role="alert" className="mb-6 flex gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" data-testid="status-storage-error">
+    <div role="alert" className="mb-6 flex gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" data-testid="status-storage-error">
       <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" aria-hidden />
       <p>{loadError}</p>
     </div>
@@ -54,7 +55,7 @@ function LocalNote() {
     </button>
   );
   return (
-    <div className="relative rounded-xl border border-border bg-card p-3 pr-8 text-xs leading-relaxed text-muted-foreground" data-testid="text-storage-note">
+    <div className="relative rounded-md border border-border bg-card p-3 pr-8 text-xs leading-relaxed text-muted-foreground" data-testid="text-storage-note">
       <HardDrive className="mb-1.5 h-4 w-4 text-[hsl(var(--brand-ink))]" aria-hidden />
       Your records live only in this browser on this device. They won't sync elsewhere, and clearing site data will erase them.
       <button aria-label="Hide storage note" onClick={() => { setOpen(false); try { localStorage.setItem("jobtrack.noteDismissed", "1"); } catch { /* ignore */ } }} className="absolute right-2 top-2 rounded p-0.5 hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring">
@@ -89,7 +90,7 @@ export function Shell({ children }: { children: ReactNode }) {
             </Link>
           ))}
         </nav>
-        <Link href="/applications/new" data-testid="link-nav-add" className="flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-[hsl(var(--primary-hover))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
+        <Link href="/applications/new" data-testid="link-nav-add" className="flex items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[hsl(var(--primary-hover))] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring">
           <Plus className="h-4 w-4" /> Add application
         </Link>
         <div className="mt-auto"><LocalNote /></div>
@@ -136,7 +137,7 @@ export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; tit
     <div className="rise mb-8 flex flex-col gap-4 text-foreground sm:flex-row sm:items-end sm:justify-between">
       <div>
         {eyebrow && <p className="mb-1.5 text-xs font-semibold uppercase tracking-wider text-[hsl(var(--brand-ink))]">{eyebrow}</p>}
-        <h1 className="text-2xl font-bold tracking-tight sm:text-3xl">{title}</h1>
+        <h1 className="text-2xl font-bold tracking-tight text-[hsl(222_30%_8%)] sm:text-[2rem]">{title}</h1>
       </div>
       {children && <div className="flex flex-wrap gap-2">{children}</div>}
     </div>
@@ -144,7 +145,7 @@ export function PageHeader({ eyebrow, title, children }: { eyebrow?: string; tit
 }
 
 export const btn = {
-  primary: "inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-[hsl(var(--primary-hover))] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
+  primary: "inline-flex items-center justify-center gap-2 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-primary-foreground transition-colors hover:bg-[hsl(var(--primary-hover))] disabled:opacity-50 disabled:pointer-events-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
   ghost: "inline-flex items-center justify-center gap-2 rounded-lg border border-border bg-card px-4 py-2.5 text-sm font-medium transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
   danger: "inline-flex items-center justify-center gap-2 rounded-lg border border-destructive/30 bg-card px-4 py-2.5 text-sm font-medium text-destructive transition-colors hover:bg-destructive/5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring",
 };

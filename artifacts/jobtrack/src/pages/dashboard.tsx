@@ -30,7 +30,7 @@ export default function Dashboard() {
       </PageHeader>
 
       {apps.length === 0 ? (
-        <div className="rise relative overflow-hidden rounded-2xl border border-border bg-card p-8 sm:p-12" data-testid="empty-dashboard">
+        <div className="rise relative overflow-hidden rounded-md border border-border bg-card p-8 sm:p-12" data-testid="empty-dashboard">
           <div className="relative max-w-md">
             <h2 className="text-2xl font-semibold">A clean page to start from.</h2>
             <p className="mt-3 text-muted-foreground">Add the first role you've applied to — or one you're saving for later. Your totals, status counts and upcoming interviews will fill in here as you go.</p>
@@ -39,7 +39,7 @@ export default function Dashboard() {
         </div>
       ) : (
         <div className="grid gap-6 lg:grid-cols-[1.35fr_1fr]">
-          <section aria-label="Totals" className="rise grid grid-cols-3 overflow-hidden rounded-2xl border border-border bg-card lg:col-span-2">
+          <section aria-label="Totals" className="rise grid grid-cols-3 overflow-hidden rounded-md border border-border bg-card lg:col-span-2">
             {[
               { label: "Total tracked", value: apps.length, id: "total" },
               { label: "Still open", value: stats.open, id: "open" },
@@ -52,13 +52,13 @@ export default function Dashboard() {
             ))}
           </section>
 
-          <section aria-labelledby="up-h" className="rise rounded-2xl border border-border bg-card p-5 sm:p-7 lg:row-span-2 lg:col-start-2" style={{ animationDelay: "80ms" }}>
+          <section aria-labelledby="up-h" className="rise rounded-md border border-border bg-card p-5 sm:p-7 lg:row-span-2 lg:col-start-2" style={{ animationDelay: "80ms" }}>
             <div className="mb-5 flex items-center justify-between">
               <h2 id="up-h" className="text-xl font-semibold">Upcoming interviews</h2>
               <span className="rounded-full bg-accent px-2 py-0.5 font-mono text-xs text-accent-foreground" data-testid="text-count-upcoming">{upcoming.length}</span>
             </div>
             {upcoming.length === 0 ? (
-              <div className="rounded-xl border border-dashed border-border p-6 text-center" data-testid="empty-upcoming">
+              <div className="rounded-md border border-dashed border-border p-6 text-center" data-testid="empty-upcoming">
                 <CalendarClock className="mx-auto h-6 w-6 text-muted-foreground" aria-hidden />
                 <p className="mt-2 text-sm text-muted-foreground">No interviews on the calendar. When you add a future date to an open application, it shows up here.</p>
               </div>
@@ -68,7 +68,7 @@ export default function Dashboard() {
                   const rel = relativeDay(app.interviewDate);
                   return (
                     <li key={app.id}>
-                      <Link href={`/applications/${app.id}`} data-testid={`link-upcoming-${app.id}`} className="group flex gap-4 rounded-xl p-3 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring">
+                      <Link href={`/applications/${app.id}`} data-testid={`link-upcoming-${app.id}`} className="group flex gap-4 rounded-md p-3 transition-colors hover:bg-muted focus-visible:outline-2 focus-visible:outline-ring">
                         <div className="flex w-12 shrink-0 flex-col items-center rounded-lg border border-border bg-background py-1.5">
                           <span className="font-mono text-[10px] uppercase text-[hsl(var(--brand-ink))]">{formatDate(app.interviewDate, { month: "short" })}</span>
                           <span className="text-xl font-semibold leading-tight">{formatDate(app.interviewDate, { day: "numeric" })}</span>
@@ -93,7 +93,7 @@ export default function Dashboard() {
           </section>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-1 xl:grid-cols-2 lg:col-start-1 lg:row-start-2">
-            <section aria-labelledby="st-h" className="rise rounded-2xl border border-border bg-card p-5 sm:p-6" style={{ animationDelay: "120ms" }}>
+            <section aria-labelledby="st-h" className="rise rounded-md border border-border bg-card p-5 sm:p-6" style={{ animationDelay: "120ms" }}>
               <h2 id="st-h" className="mb-4 text-lg font-semibold">By status</h2>
               <ul className="flex flex-col">
                 {STATUSES.map((s) => {
@@ -110,7 +110,7 @@ export default function Dashboard() {
                 })}
               </ul>
             </section>
-            <section aria-labelledby="ty-h" className="rise rounded-2xl border border-border bg-card p-5 sm:p-6" style={{ animationDelay: "160ms" }}>
+            <section aria-labelledby="ty-h" className="rise rounded-md border border-border bg-card p-5 sm:p-6" style={{ animationDelay: "160ms" }}>
               <h2 id="ty-h" className="mb-4 text-lg font-semibold">By opportunity type</h2>
               <ul className="flex flex-col gap-3">
                 {OPPORTUNITY_TYPES.map((t) => {
@@ -132,7 +132,7 @@ export default function Dashboard() {
             </section>
           </div>
 
-          <section className="rise lg:col-span-2 rounded-2xl border border-border bg-card p-5 sm:p-6">
+          <section className="rise lg:col-span-2 rounded-md border border-border bg-card p-5 sm:p-6">
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-lg font-semibold">Recently updated</h2>
               <Link href="/applications" className="inline-flex items-center gap-1 text-sm text-primary hover:underline" data-testid="link-view-all">View all <ArrowRight className="h-3.5 w-3.5" /></Link>

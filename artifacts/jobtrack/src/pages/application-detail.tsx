@@ -95,14 +95,14 @@ export default function ApplicationDetail() {
       <p className="-mt-6 mb-6 text-lg text-muted-foreground" data-testid="text-position">{app.positionTitle}</p>
 
       {actionError && (
-        <div role="alert" className="mb-6 flex gap-3 rounded-xl border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" data-testid="status-action-error">
+        <div role="alert" className="mb-6 flex gap-3 rounded-md border border-destructive/30 bg-destructive/5 p-4 text-sm text-destructive" data-testid="status-action-error">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0" /><p><strong>Not saved.</strong> {actionError}</p>
         </div>
       )}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_300px]">
         <div className="flex flex-col gap-6">
-          <section className="rise rounded-2xl border border-border bg-card p-5 sm:p-6" aria-labelledby="d-role">
+          <section className="rise rounded-md border border-border bg-card p-5 sm:p-6" aria-labelledby="d-role">
             <h2 id="d-role" className="mb-2 text-lg font-semibold">Details</h2>
             <dl>
               <Row label="Company" testid="text-detail-company">{app.companyName}</Row>
@@ -116,13 +116,13 @@ export default function ApplicationDetail() {
             </dl>
           </section>
 
-          <section className="rise rounded-2xl border border-border bg-card p-5 sm:p-6" aria-labelledby="d-int" style={{ animationDelay: "60ms" }}>
+          <section className="rise rounded-md border border-border bg-card p-5 sm:p-6" aria-labelledby="d-int" style={{ animationDelay: "60ms" }}>
             <div className="mb-2 flex items-center justify-between">
               <h2 id="d-int" className="text-lg font-semibold">Interview</h2>
               {when && <span className={`rounded-full px-2 py-0.5 font-mono text-[11px] ${past ? "bg-muted text-muted-foreground" : isClosed(app.status) ? "bg-muted text-muted-foreground" : "bg-accent text-accent-foreground"}`}>{past ? "Past" : isClosed(app.status) ? "Closed" : "Upcoming"}</span>}
             </div>
             {!hasInterview ? (
-              <div className="flex items-center gap-3 rounded-xl border border-dashed border-border p-4 text-sm text-muted-foreground" data-testid="empty-interview">
+              <div className="flex items-center gap-3 rounded-md border border-dashed border-border p-4 text-sm text-muted-foreground" data-testid="empty-interview">
                 <CalendarClock className="h-5 w-5 shrink-0" />
                 <span>No interview details yet. <button onClick={() => setEditing(true)} className="text-primary underline-offset-2 hover:underline" data-testid="button-add-interview">Add them</button> when you hear back.</span>
               </div>
@@ -137,14 +137,14 @@ export default function ApplicationDetail() {
             )}
           </section>
 
-          <section className="rise rounded-2xl border border-border bg-card p-5 sm:p-6" style={{ animationDelay: "100ms" }}>
+          <section className="rise rounded-md border border-border bg-card p-5 sm:p-6" style={{ animationDelay: "100ms" }}>
             <h2 className="mb-3 text-lg font-semibold">Notes</h2>
             <div className="text-sm leading-relaxed" data-testid="text-notes"><Maybe value={app.notes} /></div>
           </section>
         </div>
 
         <aside className="rise flex flex-col gap-4 lg:sticky lg:top-10 lg:self-start" style={{ animationDelay: "140ms" }}>
-          <div className="rounded-2xl border border-border bg-card p-5">
+          <div className="rounded-md border border-border bg-card p-5">
             <label htmlFor="quick-status" className="text-sm font-medium">Quick status update</label>
             <p className="mb-3 mt-0.5 text-xs text-muted-foreground">Saves immediately.</p>
             <select id="quick-status" value={app.status} onChange={(e) => changeStatus(e.target.value as Status)} data-testid="select-quick-status"

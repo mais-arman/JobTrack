@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { Link, useLocation, useSearch } from "wouter";
-import { Search, Plus, RotateCcw, CalendarClock, SearchX, ChevronRight } from "lucide-react";
+import { Search, Plus, RotateCcw, CalendarClock, SearchX, Building2, Briefcase, Tag, MapPin, Calendar, Inbox, CircleDot } from "lucide-react";
 import { OPPORTUNITY_TYPES, WORK_MODES, STATUSES, formatDate, formatTime } from "@/lib/domain";
 import { useStore } from "@/lib/store";
 import { PageHeader, StatusBadge, SourceTag, btn } from "@/components/jt";
@@ -42,7 +42,7 @@ export default function Applications() {
       </PageHeader>
 
       {apps.length > 0 && (
-        <div className="rise mb-5 flex flex-col gap-3 rounded-2xl border border-border bg-card p-3 lg:flex-row lg:items-center" role="search">
+        <div className="rise mb-5 flex flex-col gap-3 rounded-md border border-border bg-card p-2 lg:flex-row lg:items-center" role="search">
           <label className="relative flex-1">
             <span className="sr-only">Search applications</span>
             <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" aria-hidden />
@@ -76,41 +76,51 @@ export default function Applications() {
       </p>}
 
       {apps.length === 0 ? (
-        <div className="rise rounded-2xl border border-dashed border-border bg-card/60 px-6 py-16 text-center" data-testid="empty-applications">
+        <div className="rise rounded-md border border-dashed border-border bg-card/60 px-6 py-16 text-center" data-testid="empty-applications">
           <div className="mx-auto mb-4 grid h-12 w-12 place-items-center rounded-full bg-accent text-accent-foreground"><Plus className="h-5 w-5" /></div>
           <h2 className="text-xl font-semibold">Nothing tracked yet</h2>
           <p className="mx-auto mt-2 max-w-sm text-sm text-muted-foreground">Every role you add lands here — searchable and filterable, so nothing slips through.</p>
           <Link href="/applications/new" className={cn(btn.primary, "mt-6")} data-testid="link-add-first">Add an application</Link>
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rise rounded-2xl border border-dashed border-border bg-card/60 px-6 py-14 text-center" data-testid="empty-no-results">
+        <div className="rise rounded-md border border-dashed border-border bg-card/60 px-6 py-14 text-center" data-testid="empty-no-results">
           <SearchX className="mx-auto h-7 w-7 text-muted-foreground" aria-hidden />
           <h2 className="mt-3 text-lg font-semibold">No applications match</h2>
           <p className="mt-1 text-sm text-muted-foreground">Try a different search or loosen a filter.</p>
           <button onClick={reset} className={cn(btn.ghost, "mt-5")} data-testid="button-reset-empty"><RotateCcw className="h-4 w-4" /> Reset filters</button>
         </div>
       ) : (
-        <ul className="flex flex-col gap-2">
-          {filtered.map((a, i) => (
-            <li key={a.id} className="rise" style={{ animationDelay: `${Math.min(i, 10) * 30}ms` }}>
-              <Link href={`/applications/${a.id}`} data-testid={`card-application-${a.id}`}
-                className="group grid grid-cols-[1fr_auto] items-center gap-x-4 gap-y-2 rounded-xl border border-border bg-card p-4 transition-all hover:-translate-y-px hover:border-primary hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-ring sm:grid-cols-[1fr_auto_auto] sm:px-5">
-                <div className="min-w-0">
-                  <p className="truncate font-medium">{a.companyName}</p>
-                  <p className="truncate text-sm text-muted-foreground">{a.positionTitle}</p>
-                  <p className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-                    <span>{a.opportunityType}</span><span aria-hidden>·</span><span>{a.workMode}</span><span aria-hidden>·</span>
-                    <span>Applied {formatDate(a.applicationDate)}</span>
-                    {a.interviewDate && <span className="inline-flex items-center gap-1 text-[hsl(var(--brand-ink))]"><CalendarClock className="h-3 w-3" />{formatDate(a.interviewDate, { month: "short", day: "numeric" })} {formatTime(a.interviewTime)}</span>}
-                    <SourceTag source={a.source} />
-                  </p>
-                </div>
-                <StatusBadge status={a.status} />
-                <ChevronRight className="hidden h-4 w-4 text-muted-foreground transition-transform group-hover:translate-x-0.5 sm:block" />
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="rise overflow-x-auto rounded-md border border-border bg-card" data-testid="table-applications">
+          <table className="w-full min-w-[860px] border-collapse text-sm">
+            <caption className="sr-only">Applications</caption>
+            <thead>
+              <tr className="text-left text-xs font-medium text-muted-foreground">
+                {[["Company", Building2], ["Position", Briefcase], ["Type", Tag], ["Work mode", MapPin], ["Applied", Calendar], ["Interview", CalendarClock], ["Source", Inbox], ["Status", CircleDot]].map(([l, I]) => {
+                  const Icon = I as typeof Tag;
+                  return <th key={l as string} scope="col" className="border-b border-r border-border px-3 py-2.5 font-medium last:border-r-0"><span className="inline-flex items-center gap-1.5 whitespace-nowrap"><Icon className="h-3.5 w-3.5" aria-hidden />{l as string}</span></th>;
+                })}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((a) => (
+                <tr key={a.id} className="group transition-colors hover:bg-accent/40 [&>td]:border-b [&>td]:border-r [&>td]:border-border [&>td:last-child]:border-r-0 [&:last-child>td]:border-b-0" data-testid={`row-application-${a.id}`}>
+                  <td className="px-3 py-1.5">
+                    <Link href={`/applications/${a.id}`} data-testid={`card-application-${a.id}`} className="-mx-1 inline-flex min-h-9 max-w-[200px] items-center rounded px-1 font-semibold underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-ring">
+                      <span className="truncate">{a.companyName}</span>
+                    </Link>
+                  </td>
+                  <td className="max-w-[220px] truncate px-3 py-1.5">{a.positionTitle}</td>
+                  <td className="px-3 py-1.5"><span className="inline-block whitespace-nowrap rounded-sm border border-border bg-muted px-1.5 py-0.5 text-xs">{a.opportunityType}</span></td>
+                  <td className="px-3 py-1.5"><span className="inline-block whitespace-nowrap rounded-sm bg-accent px-1.5 py-0.5 text-xs font-medium text-accent-foreground">{a.workMode}</span></td>
+                  <td className="whitespace-nowrap px-3 py-1.5 tabular-nums">{formatDate(a.applicationDate)}</td>
+                  <td className="whitespace-nowrap px-3 py-1.5 tabular-nums">{a.interviewDate ? <span className="text-[hsl(var(--brand-ink))]">{formatDate(a.interviewDate, { month: "short", day: "numeric" })} {formatTime(a.interviewTime)}</span> : <span className="text-muted-foreground" aria-label="None">—</span>}</td>
+                  <td className="px-3 py-1.5"><SourceTag source={a.source} /></td>
+                  <td className="px-3 py-1.5"><StatusBadge status={a.status} /></td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
     </>
   );

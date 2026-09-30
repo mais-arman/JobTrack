@@ -1,0 +1,50 @@
+Use the attached reference image as the PRIMARY visual design reference for JobTrack.
+
+IMPORTANT:
+Recreate the visual style, layout structure, spacing, proportions, component styling, typography hierarchy, card design, navigation style, and overall visual language of the reference image.
+
+Do NOT copy the exact content from the image.
+Do NOT copy text, branding, logos, or unrelated features.
+
+Instead, adapt the visual design to the existing JobTrack application and its MVP requirements.
+
+JOBTRACK BRAND REQUIREMENTS:
+- Yellow must be the primary brand and accent color.
+- Use a monochromatic yellow palette with different shades, tints, and tones.
+- Do not make the entire interface yellow.
+- Use white, off-white, light neutral gray, and dark neutral colors for backgrounds, surfaces, text, and borders.
+- Yellow should be used mainly for primary actions, active states, highlights, badges, icons, and important accents.
+- Do not use green as the primary brand color.
+- Do not introduce unrelated accent colors except when needed for semantic status indicators.
+
+REFERENCE IMAGE:
+Treat the attached image as the source of truth for the visual direction.
+Match its:
+- Overall layout
+- Visual hierarchy
+- Spacing
+- Alignment
+- Card shapes
+- Border radius
+- Shadows
+- Navigation style
+- Button style
+- Input style
+- Typography hierarchy
+- Information density
+- Component proportions
+- Overall look and feel
+
+However, adapt everything to JobTrack's actual content, pages, fields, filters, and functionality.
+
+IMPORTANT:
+- Modify the EXISTING application.
+- Do NOT rebuild the application from scratch.
+- Do NOT change existing functionality.
+- Do NOT add unnecessary pages or features.
+- Keep the design responsive on desktop, tablet, and mobile.
+- Use reusable components and consistent design tokens.
+- Apply the visual system consistently across the entire application.
+
+First analyze the reference image and identify its visual design system.
+Then apply that design language to the existing JobTrack UI while following the JobTrack Design System skill.
