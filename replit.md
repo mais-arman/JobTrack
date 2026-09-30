@@ -1,6 +1,6 @@
-# [Project name]
+# JobTrack
 
-_Replace the heading above with the project's name, and this line with one sentence describing what this app does for users._
+JobTrack is a personal tracker for jobs, internships, training, and other opportunities.
 
 ## Run & Operate
 
@@ -26,15 +26,17 @@ _Populate as you build — short repo map plus pointers to the source-of-truth f
 
 ## Architecture decisions
 
-_Populate as you build — non-obvious choices a reader couldn't infer from the code (3-5 bullets)._
+- The initial MVP is browser-local with no sign-in or server-side application storage. This keeps personal records separate without adding account management to the core tracking scope. Records do not sync between devices and can be lost if browser storage is cleared.
+- The shared API service is not required by this frontend-only MVP.
+- Gmail is a source label only, not a connected integration.
 
 ## Product
 
-_Describe the high-level user-facing capabilities of this app once they exist._
+Dashboard summaries, upcoming interviews, searchable and filterable applications, and application creation, details, updates, and deletion.
 
 ## User preferences
 
-_Populate as you build — explicit user instructions worth remembering across sessions._
+Follow `.local/custom_skills/jobtrack-design-system/SKILL.md` for JobTrack UI work. Keep the MVP focused on application tracking; exclude Gmail integration, daily routine, payments, social features, messaging, and advanced analytics.
 
 ## Gotchas
 

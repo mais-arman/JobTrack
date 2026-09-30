@@ -1,0 +1,28 @@
+kind = "web"
+previewPath = "/"
+title = "JobTrack"
+description = "A personal job and opportunity tracker with application management, status and opportunity summaries, filtering, and upcoming interviews."
+version = "1.0.0"
+id = "artifacts/jobtrack"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 24923
+
+[services.development]
+run = "pnpm --filter @workspace/jobtrack run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/jobtrack", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/jobtrack/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "24923"
+BASE_PATH = "/"
