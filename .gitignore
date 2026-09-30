@@ -47,3 +47,33 @@ Thumbs.db
 # Replit
 .cache/
 .local/
+
+# Secrets and local environment configuration (at every directory depth)
+.env
+.env.*
+!.env.example
+!.env.*.example
+*.pem
+*.key
+*.p12
+*.pfx
+credentials.json
+token.json
+tokens.json
+client_secret*.json
+service-account*.json
+
+# Local diagnostics and browser-test output
+*.log
+test-results/
+playwright-report/
+
+# Local database copies/backups; keep Drizzle .sql migrations tracked
+*.sqlite
+*.sqlite3
+*.db
+*.dump
+*.backup
+*.sql.gz
+*.sql.bz2
+backups/
